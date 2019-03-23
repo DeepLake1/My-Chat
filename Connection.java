@@ -15,7 +15,6 @@ public class Connection {
         this.socket = socket;
         this.out =  new ObjectOutputStream(socket.getOutputStream()) ;
         this.in = new ObjectInputStream(socket.getInputStream()) ;
-        System.out.println("1");
     }
 
 

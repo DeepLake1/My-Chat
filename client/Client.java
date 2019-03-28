@@ -78,9 +78,28 @@ public class Client extends Thread {
     }
 
     public class SocketThread extends Thread {
+        @Override
+        public void run() {
+            String serverAdress = getServerAddress();
+            int serverPort = getServerPort();
+            try {
+                Socket socket = new Socket(serverAdress, serverPort);
+
+                connection = new Connection(socket);
+
+                clientHandshake();
+                clientMainLoop();
+
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+                notifyConnectionStatusChanged(false);
+            }
+        }
+
         protected void clientHandshake() throws IOException, ClassNotFoundException {
             while (true) {
                 Message s = connection.receive();
+
                 if (s.getType() == MessageType.NAME_REQUEST) {
                     String nameUser = getUserName();
                     connection.send(new Message(MessageType.USER_NAME, nameUser));
@@ -96,6 +115,7 @@ public class Client extends Thread {
         protected void clientMainLoop() throws IOException, ClassNotFoundException {
 
             while (true) {
+
                 Message message = connection.receive();
                 if (message.getType() == MessageType.TEXT) {
                     processIncomingMessage(message.getData());
@@ -127,20 +147,6 @@ public class Client extends Thread {
             Client.this.clientConnected = clientConnected;
             synchronized (Client.this) {
                 Client.this.notify();
-            }
-        }
-
-        @Override
-        public void run() {
-            String serverAdress = getServerAddress();
-            int serverPort = getServerPort();
-            try {
-                Socket socket = new Socket(serverAdress, serverPort);
-                 connection = new Connection(socket);
-                clientMainLoop();
-                clientHandshake();
-            } catch (IOException | ClassNotFoundException e) {
-                notifyConnectionStatusChanged(false);
             }
         }
     }

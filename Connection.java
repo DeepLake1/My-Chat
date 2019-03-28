@@ -32,7 +32,8 @@ public class Connection implements Closeable, Serializable {
     public void close() throws IOException {
     out.close();
     in.close();
-    socket.close();
+        socket.close();
+
     }
 
 

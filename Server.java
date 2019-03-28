@@ -10,12 +10,14 @@ public class Server {
     private static Map<String, Connection> connectionMap = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(ConsoleHelper.readInt())) {
+        try {ServerSocket serverSocket = new ServerSocket(ConsoleHelper.readInt());
             System.out.println("Сервер запущен.");
             while (true) {
-                try (Socket socket = serverSocket.accept()) {
+                try {Socket socket = serverSocket.accept();
                     new Handler(socket).start();
                 } catch (Exception e) {
+                    System.out.println("Ошибка Сервера!");
+                    e.printStackTrace();
                     break;
                 }
             }
@@ -34,7 +36,7 @@ public class Server {
         public void run() {
             String userName = null;
             ConsoleHelper.writeMessage("Сoeдинение установлено с " + socket.getRemoteSocketAddress());
-            try (Connection connection = new Connection(socket)){
+            try {Connection connection = new Connection(socket);
                 userName = serverHandshake(connection);
                 sendBroadcastMessage(new Message(MessageType.USER_ADDED, userName));
                 notifyUsers(connection, userName);
@@ -76,7 +78,7 @@ public class Server {
         private void serverMainLoop(Connection connection, String userName) throws IOException, ClassNotFoundException {
             while (true) {
                 Message message = connection.receive();
-                if (/*message.getType().equals(MessageType.TEXT)*/message.getType() == MessageType.TEXT) {
+                if (message.getType() == MessageType.TEXT) {
                     Message newMessage = new Message(MessageType.TEXT, userName + ": " + message.getData());
                     Server.sendBroadcastMessage(newMessage);
                 } else {
@@ -92,7 +94,6 @@ public class Server {
                 pair.getValue().send(message);
             } catch (IOException e) {
                 ConsoleHelper.writeMessage("Не удалось отправить сообщение.");
-                //System.out.println("Не удалось отправить сообщение.");
             }
         }
     }
